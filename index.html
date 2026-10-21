@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#020603">
+<title>Lantern Battery</title>
+<style>
+  :root {
+    --green: #8cff9a;
+    --green2: #24ff55;
+    --deep: #031007;
+    --glow: rgba(45,255,82,.55);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    color: white;
+    font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at 50% 43%, rgba(38,255,74,.10), transparent 28%),
+      radial-gradient(circle at 50% 50%, #06120a 0%, #010301 60%, #000 100%);
+  }
+
+  #app {
+    position: relative;
+    width: min(100vw, 520px);
+    height: 100dvh;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .scanlines {
+    position: absolute; inset: 0; pointer-events: none; z-index: 10;
+    opacity: .08;
+    background: repeating-linear-gradient(
+      to bottom, transparent 0px, transparent 3px,
+      rgba(150,255,160,.25) 4px
+    );
+    mix-blend-mode: screen;
+  }
+
+  .stars {
+    position: absolute; inset: 0; opacity: .45; pointer-events: none;
+    background-image:
+      radial-gradient(circle, rgba(180,255,190,.65) 1px, transparent 1.5px),
+      radial-gradient(circle, rgba(180,255,190,.35) 1px, transparent 1.5px);
+    background-size: 97px 113px, 157px 181px;
+    background-position: 11px 23px, 61px 79px;
+  }
+
+  .top {
+    position: absolute;
+    top: max(28px, env(safe-area-inset-top));
+    left: 0; right: 0;
+    text-align: center;
+    letter-spacing: .26em;
+    font-size: 10px;
+    color: rgba(190,255,198,.72);
+    text-transform: uppercase;
+  }
+
+  .title {
+    font-size: clamp(18px, 5vw, 25px);
+    letter-spacing: .19em;
+    font-weight: 800;
+    text-shadow: 0 0 15px var(--glow);
+  }
+
+  .subtitle {
+    margin-top: 6px;
+    font-size: 9px;
+    letter-spacing: .28em;
+    opacity: .55;
+  }
+
+  .battery-button {
+    position: relative;
+    width: min(74vw, 310px);
+    aspect-ratio: 1 / 1.13;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    filter: drop-shadow(0 0 18px rgba(49,255,79,.25));
+    transition: transform .12s ease, filter .2s ease;
+  }
+
+  .battery-button:active {
+    transform: scale(.965);
+    filter: drop-shadow(0 0 34px rgba(49,255,79,.8));
+  }
+
+  .halo {
+    position: absolute;
+    inset: 7%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(57,255,81,.18), rgba(57,255,81,.05) 42%, transparent 68%);
+    animation: breathe 2.7s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%,100% { transform: scale(.94); opacity: .7; }
+    50% { transform: scale(1.07); opacity: 1; }
+  }
+
+  /* Cylindrical Lantern Battery inspired by the supplied prop reference */
+  .battery-button {
+    width: min(72vw, 300px);
+    aspect-ratio: 0.68 / 1;
+  }
+
+  .halo {
+    inset: -4%;
+    border-radius: 48%;
+    background:
+      radial-gradient(ellipse at center, rgba(54,255,87,.28), rgba(54,255,87,.10) 38%, transparent 70%);
+    animation: breathe 2.7s ease-in-out infinite;
+  }
+
+  .battery {
+    position: absolute;
+    left: 14%; right: 14%; top: 7%; bottom: 5%;
+    border: 0;
+    border-radius: 18% 18% 12% 12% / 8% 8% 5% 5%;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(129,255,151,.20) 0 3px,
+        rgba(3,46,17,.55) 3px 8px,
+        rgba(95,255,116,.13) 8px 11px
+      ),
+      linear-gradient(90deg, #06230e 0%, #0c6b25 18%, #16a63d 42%, #087326 66%, #032b11 100%);
+    box-shadow:
+      inset 18px 0 28px rgba(0,0,0,.42),
+      inset -16px 0 28px rgba(0,0,0,.48),
+      inset 0 0 25px rgba(87,255,111,.25),
+      0 0 16px rgba(65,255,94,.55),
+      0 0 42px rgba(65,255,94,.18);
+    border-left: 5px solid #a9863b;
+    border-right: 5px solid #a9863b;
+  }
+
+  .battery:before {
+    content: "";
+    position: absolute;
+    inset: 8% 3%;
+    border-radius: 14%;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(200,255,208,.22) 0 2px,
+        transparent 2px 9px
+      );
+    opacity: .8;
+    mix-blend-mode: screen;
+  }
+
+  .battery:after {
+    content: "";
+    position: absolute;
+    left: 8%; right: 8%; top: 8%; bottom: 7%;
+    border-radius: 12%;
+    background: linear-gradient(90deg, transparent 0 13%, rgba(190,255,202,.20) 19%, transparent 27% 72%, rgba(0,0,0,.25) 84%, transparent 91%);
+    pointer-events: none;
+  }
+
+  .top-cap, .bottom-cap {
+    position: absolute;
+    left: -8%; right: -8%;
+    height: 9%;
+    border: 3px solid #b18b3e;
+    background:
+      linear-gradient(#302c20, #80703d 25%, #181811 47%, #9a7d38 70%, #252316);
+    box-shadow:
+      0 0 0 2px rgba(0,0,0,.8),
+      0 0 14px rgba(78,255,99,.28);
+    z-index: 4;
+    clip-path: polygon(5% 0,95% 0,100% 24%,100% 78%,95% 100%,5% 100%,0 78%,0 24%);
+  }
+  .top-cap { top: 0; transform: translateY(-35%); }
+  .bottom-cap { bottom: 0; transform: translateY(35%); }
+
+  .top-cap:after {
+    content: "";
+    position: absolute;
+    left: 31%; right: 31%; top: -35%;
+    height: 55%;
+    border-radius: 45%;
+    background: linear-gradient(#b99850, #544b2c 55%, #a78542);
+    box-shadow: 0 -2px 8px rgba(0,0,0,.8);
+  }
+
+  .emblem-ring {
+    position: absolute;
+    left: 24%; right: 24%; top: 40%;
+    aspect-ratio: 1;
+    border: 7px double #c09a4b;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, #0b3d18 0 43%, #166d2b 44% 56%, #08250f 57% 62%, #aa853c 63% 67%, #2b2718 68% 100%);
+    box-shadow:
+      0 0 0 2px rgba(0,0,0,.7),
+      0 0 17px rgba(58,255,82,.5),
+      inset 0 0 12px rgba(80,255,102,.25);
+    display: grid;
+    place-items: center;
+    z-index: 5;
+  }
+
+  .emblem {
+    width: 44%; height: 38%;
+    position: relative;
+    background: #b89446;
+    filter: drop-shadow(0 0 5px rgba(105,255,121,.7));
+    clip-path: polygon(
+      0 18%, 34% 18%, 34% 0, 66% 0, 66% 18%, 100% 18%,
+      100% 82%, 66% 82%, 66% 100%, 34% 100%, 34% 82%, 0 82%
+    );
+  }
+
+  .emblem:after {
+    content: "";
+    position: absolute;
+    inset: 19%;
+    background: #06220d;
+    clip-path: inherit;
+  }
+
+  .core {
+    position: absolute;
+    left: 22%; right: 22%; top: 25%;
+    height: 56%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(111,255,128,.18), transparent 65%);
+    box-shadow: 0 0 30px 12px rgba(70,255,91,.18);
+    animation: corepulse 1.8s ease-in-out infinite;
+    z-index: 1;
+  }
+
+  .side-lines {
+    position: absolute;
+    left: -8%; right: -8%; top: 43%;
+    height: 25%;
+    border-top: 7px solid #a5823d;
+    border-bottom: 7px solid #a5823d;
+    box-shadow:
+      0 -3px 0 #272417,
+      0 3px 0 #272417,
+      0 0 12px rgba(0,0,0,.6);
+    z-index: 3;
+    background: transparent;
+  }
+
+  @keyframes breathe {
+    0%,100% { transform: scale(.95); opacity: .72; }
+    50% { transform: scale(1.06); opacity: 1; }
+  }
+
+  .readout {
+    position: absolute;
+    bottom: max(52px, env(safe-area-inset-bottom));
+    left: 0; right: 0;
+    text-align: center;
+  }
+
+  .label {
+    font-size: 9px;
+    letter-spacing: .32em;
+    color: rgba(190,255,198,.55);
+    margin-bottom: 8px;
+  }
+
+  #percent {
+    font-size: clamp(46px, 14vw, 70px);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: .9;
+    text-shadow: 0 0 12px var(--green), 0 0 35px rgba(49,255,79,.45);
+  }
+
+  #status {
+    margin-top: 10px;
+    font-size: 9px;
+    letter-spacing: .25em;
+    opacity: .62;
+    text-transform: uppercase;
+  }
+
+  #tapHint {
+    margin-top: 18px;
+    font-size: 9px;
+    letter-spacing: .18em;
+    opacity: .38;
+    text-transform: uppercase;
+  }
+
+  .flash {
+    position: absolute; inset: 0; z-index: 20; pointer-events: none;
+    background: rgba(120,255,140,.75);
+    opacity: 0;
+  }
+
+  .flash.go { animation: flash .42s ease-out; }
+  @keyframes flash {
+    0% { opacity: 0; }
+    15% { opacity: .8; }
+    100% { opacity: 0; }
+  }
+
+  .corner {
+    position: absolute;
+    width: 25px; height: 25px;
+    border-color: rgba(130,255,145,.45);
+    pointer-events: none;
+  }
+  .tl { top: 18px; left: 18px; border-top: 1px solid; border-left: 1px solid; }
+  .tr { top: 18px; right: 18px; border-top: 1px solid; border-right: 1px solid; }
+  .bl { bottom: 18px; left: 18px; border-bottom: 1px solid; border-left: 1px solid; }
+  .br { bottom: 18px; right: 18px; border-bottom: 1px solid; border-right: 1px solid; }
+
+  .unsupported {
+    position: absolute;
+    top: 92px;
+    left: 18px; right: 18px;
+    text-align: center;
+    font-size: 8px;
+    letter-spacing: .12em;
+    color: rgba(255,255,255,.35);
+    display: none;
+  }
+
+  @media (max-height: 650px) {
+    .battery-button { width: 230px; }
+    .readout { bottom: 25px; }
+    .top { top: 15px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="corner tl"></div><div class="corner tr"></div>
+  <div class="corner bl"></div><div class="corner br"></div>
+  <div class="top">
+    <div class="title">GREEN LANTERN</div>
+    <div class="subtitle">POWER BATTERY // RING LINK</div>
+  </div>
+
+  <button class="battery-button" id="batteryButton" aria-label="Activate Lantern Battery">
+    <div class="halo"></div>
+    <div class="battery">
+      <div class="top-cap"></div>
+      <div class="bottom-cap"></div>
+      <div class="emblem-ring"><div class="emblem"></div></div>
+      <div class="core"></div>
+      <div class="side-lines"></div>
+    </div>
+  </button>
+
+  <div class="readout">
+    <div class="label">RING POWER RESERVE</div>
+    <div id="percent">--%</div>
+    <div id="status">TAP BATTERY TO CHECK</div>
+    <div id="tapHint">TAP WITH YOUR RING</div>
+  </div>
+
+  <div class="unsupported" id="unsupported">
+    DEVICE BATTERY ACCESS UNAVAILABLE — DEMO MODE ENABLED
+  </div>
+  <div class="flash" id="flash"></div>
+</div>
+
+<script>
+let batteryLevel = 87;
+let hasNativeBattery = false;
+
+const percentEl = document.getElementById("percent");
+const statusEl = document.getElementById("status");
+const hintEl = document.getElementById("tapHint");
+const unsupportedEl = document.getElementById("unsupported");
+const flashEl = document.getElementById("flash");
+const button = document.getElementById("batteryButton");
+
+function setPercent(value) {
+  batteryLevel = Math.max(0, Math.min(100, Math.round(value)));
+  percentEl.textContent = batteryLevel + "%";
+
+  if (batteryLevel <= 10) statusEl.textContent = "CRITICAL POWER RESERVE";
+  else if (batteryLevel <= 25) statusEl.textContent = "LOW POWER RESERVE";
+  else if (batteryLevel <= 50) statusEl.textContent = "POWER RESERVE NOMINAL";
+  else statusEl.textContent = "POWER RESERVE OPTIMAL";
+}
+
+function numberToWords(n) {
+  const ones = ["zero","one","two","three","four","five","six","seven","eight","nine",
+                "ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen",
+                "seventeen","eighteen","nineteen"];
+  const tens = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+  if (n < 20) return ones[n];
+  if (n < 100) return tens[Math.floor(n/10)] + (n%10 ? "-" + ones[n%10] : "");
+  return ones[Math.floor(n/100)] + " hundred" + (n%100 ? " " + numberToWords(n%100) : "");
+}
+
+function speakPower() {
+  if (!("speechSynthesis" in window)) return;
+
+  window.speechSynthesis.cancel();
+  const text = batteryLevel <= 10
+    ? `Warning. Lantern power at ${numberToWords(batteryLevel)} percent. Recharge immediately.`
+    : `Lantern power: ${numberToWords(batteryLevel)} percent.`;
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 0.86;
+  utterance.pitch = 0.72;
+  utterance.volume = 1;
+  window.speechSynthesis.speak(utterance);
+}
+
+function activate() {
+  flashEl.classList.remove("go");
+  void flashEl.offsetWidth;
+  flashEl.classList.add("go");
+
+  statusEl.textContent = "POWER LEVEL VERIFIED";
+  speakPower();
+
+  setTimeout(() => {
+    if (batteryLevel <= 10) statusEl.textContent = "CRITICAL POWER RESERVE";
+    else if (batteryLevel <= 25) statusEl.textContent = "LOW POWER RESERVE";
+    else if (batteryLevel <= 50) statusEl.textContent = "POWER RESERVE NOMINAL";
+    else statusEl.textContent = "POWER RESERVE OPTIMAL";
+  }, 2200);
+}
+
+button.addEventListener("click", activate);
+button.addEventListener("touchend", e => {
+  e.preventDefault();
+  activate();
+}, {passive:false});
+
+async function getBattery() {
+  try {
+    if ("getBattery" in navigator) {
+      const b = await navigator.getBattery();
+      hasNativeBattery = true;
+      setPercent(b.level * 100);
+      b.addEventListener("levelchange", () => setPercent(b.level * 100));
+      b.addEventListener("chargingchange", () => {
+        if (b.charging) statusEl.textContent = "POWER CELL RECHARGING";
+      });
+      return;
+    }
+  } catch(e) {}
+  unsupportedEl.style.display = "block";
+  setPercent(batteryLevel);
+}
+
+// Optional demo mode: append ?battery=73 to the URL.
+const params = new URLSearchParams(location.search);
+if (params.get("charging") === "true") {
+  statusEl.textContent = "POWER CELL RECHARGING";
+}
+if (params.has("battery")) {
+  const supplied = Number(params.get("battery"));
+  if (Number.isFinite(supplied)) setPercent(supplied);
+}
+
+getBattery();
+</script>
+</body>
+</html>
